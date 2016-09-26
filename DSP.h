@@ -2,50 +2,53 @@
  * Samples.h
  *
  *  Created on: Aug 7, 2016
- *      Author: epileftric
- *
- * 	This namespace defines and implements the template  samples_t<n,type> for signal processing.
- *  The general idea of it's implementation is to simplify the process of dealing with samples
- *  and filtering. 
+ *      Author: epileftric 
+ * 
+ *   This namespace defines and implements the template  samples_t<n,type> for signal processing. 
+ *  The general idea of it's implementation is to simplify the process of dealing with samples 
+ *  and filtering.  
+ *   
+ *  Just by setting two samples_t you can use one for the samples you read and another for the filter 
+ *  coeficients, then you get the filtered signal just by multiplying boths. 
  *  
- *  Just by setting two samples_t you can use one for the samples you read and another for the filter
- *  coeficients, then you get the filtered signal just by multiplying boths.
- * 
- * 
- *  Example:
- * 
- * 	  samples_t<3,float> samples, 
- * 						 filter;
- *    float  output;
- * 
- * 	  filter << 0.25
- * 	  filter << 0.50
- * 	  filter << 0.25
- * 	 
- * 	  while(true){
- * 	 		samples << readADC();
- * 			output = samples * filter;
- * 	 		set_output( output );
- * 			delay();
- * 	  }
  *  
- */
+ *  Example: 
+ *  
+ *     samples_t<3,float> samples,  
+ *              filter; 
+ *    float  output; 
+ *  
+ *     filter << 0.25 
+ *     filter << 0.50 
+ *     filter << 0.25 
+ *     
+ *     while(true){ 
+ *        samples << readADC(); 
+ *       output = samples * filter; 
+ *        set_output( output ); 
+ *       delay(); 
+ *     } 
+ *   
+ */ 
 
 #ifndef SRC_DSP_H_
 #define SRC_DSP_H_
 
 #include <string.h>
+#include <math.h>
 
 namespace DSP {
 
 	template<unsigned int N=3,typename T=float>
 	struct samples_t {
 	 public:
-	 	//~ Returns the lastest sample
+	 
+	 
+		//~ Return the lastest sample
 		inline T& last(void){
 			return s[N-1];
 		}
-		//~ Returns the oldest sample
+		//~ Return the oldest sample
 		inline T& first(void){
 			return s[0];
 		}
@@ -132,10 +135,39 @@ namespace DSP {
 			return a;
 		}
 		
+		T min_sample(void){
+			T m = s[0];
+			for (size_t i = 0; i < N; i++) {
+				m = s[i] < m ? s[i] : m;
+			}
+			return m;
+		}
+
+		T max_sample(void){
+			T M = s[0];
+			for (size_t i = 0; i < N; i++) {
+				M = s[i] > M ? s[i] : M;
+			}
+			return M;
+		}
+		
+		
 		//~ Sorts the samples in an auxiliar vector and then returns the value that's in the midle
 		T median(void){
 			samples_t<N,T> sorted = this->sorted();
 			return sorted.s[N/2];					
+		}
+		
+		inline T stddev(void){
+			T x_bar,
+			  sd= (T) 0;
+
+			x_bar = mean();
+			for( int i = 0 ;  i < N ; i++ ){
+				sd += pow(s[i] - x_bar, 2 );
+			}
+			sd /= (N-1);
+			return sqrt(sd);
 		}
 		
 		//~ Return the convolution from this vector with another of different size and any other type
@@ -185,6 +217,7 @@ namespace DSP {
 		}
 
 
+
 		//! reference to the internal buffer
 		inline T* S(void){
 			return s;
@@ -229,6 +262,14 @@ namespace DSP {
 				}
 			}
 		};
+
+	typedef samples_t<6,float> samples6f_t;
+	typedef samples_t<5,float> samples5f_t;
+	typedef samples_t<4,float> samples4f_t;
+	typedef samples_t<3,float> samples3f_t;
+	typedef samples_t<2,float> samples2f_t;
+
+	typedef samples_t<3,float> pid_t;
 
 };
 
