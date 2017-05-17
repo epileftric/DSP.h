@@ -90,6 +90,14 @@ namespace DSP {
 			return f;
 		}
 
+		template<typename R>
+		inline T operator * (samples_t<N,R> k ){
+			R f = 0.0;
+			for( unsigned int i = 0; i < N ; i++)
+				f += s[i] * k.S()[i];
+			return (T)f;
+		}
+		
 		//~ Adds a sample to the vector, increasing its size by 1
 		//~ There's no += operator since this kind of operation changes the type
 		inline samples_t<N+1,T> operator + (T f){
