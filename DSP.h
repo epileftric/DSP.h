@@ -166,16 +166,24 @@ namespace DSP {
 			return sorted.s[N/2];					
 		}
 		
-		inline T stddev(void){
+		inline T variance(float* x_m = NULL){
 			T x_bar,
-			  sd= (T) 0;
+			  var= (T) 0;
 
 			x_bar = mean();
-			for( int i = 0 ;  i < N ; i++ ){
-				sd += pow(s[i] - x_bar, 2 );
+			if (x_m){
+				*x_m = x_bar;
 			}
-			sd /= (N-1);
-			return sqrt(sd);
+			for( int i = 0 ;  i < N ; i++ ){
+				T aux = (s[i] - x_bar);
+				var += aux * aux;
+			}
+			var /= (N-1);
+			return var;
+		}
+
+		inline float stddev(float* x_m = NULL){
+			return sqrt(variance(x_m));
 		}
 		
 		//~ Return the convolution from this vector with another of different size and any other type
